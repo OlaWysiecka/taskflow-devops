@@ -11,8 +11,8 @@ RUN groupadd --system app && \
     useradd --system --gid app --create-home app
 
 # Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt requirements-prod.txt ./
+RUN pip install --no-cache-dir -r requirements-prod.txt
 
 # Copy application source code
 COPY --chown=app:app app ./app
@@ -25,4 +25,4 @@ USER app
 
 EXPOSE 5000
 
-CMD ["python", "-m", "flask", "--app", "app", "run", "--host=0.0.0.0", "--port=5000"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--access-logfile", "-", "--error-logfile", "-", "app:create_app()"]
