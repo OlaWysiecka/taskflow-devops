@@ -153,6 +153,8 @@ The repository will contain:
 
 ## 10. Current Status
 
-The project is in development. The initial Flask application and automated tests are implemented.
+The initial Flask application with CRUD functionality, automated tests, and code quality checks is implemented. The application is containerized using Docker and Docker Compose, with PostgreSQL configured for the DEV environment.
 
-CI/CD, infrastructure automation, production deployment, and monitoring will be implemented in subsequent stages.
+PostgreSQL integration tests have been implemented using a dedicated test database and a separate Docker Compose configuration. Gunicorn has been configured as the production application server.
+
+CI/CD automation, infrastructure provisioning, production deployment, and monitoring are still in progress.
