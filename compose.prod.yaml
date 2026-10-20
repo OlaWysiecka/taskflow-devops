@@ -1,0 +1,14 @@
+services:
+  app:
+    environment:
+      FLASK_DEBUG: "0"
+    restart: unless-stopped
+
+  db:
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    name: taskflow_prod_data
