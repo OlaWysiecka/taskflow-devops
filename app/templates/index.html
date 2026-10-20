@@ -1,0 +1,81 @@
+
+{% extends "base.html" %}
+
+{% block title %}Tasks | TaskFlow{% endblock %}
+
+{% block content %}
+    <h2>My tasks</h2>
+
+    <section>
+        <h3>Add a new task</h3>
+
+        <form action="{{ url_for('main.create_task') }}" method="post">
+            <label for="title">Title</label>
+            <input
+                id="title"
+                name="title"
+                type="text"
+                maxlength="200"
+                required
+                placeholder="Enter task title"
+            >
+
+            <label for="description">Description</label>
+            <textarea
+                id="description"
+                name="description"
+                rows="3"
+                placeholder="Optional description"
+            ></textarea>
+
+            <button type="submit">Add task</button>
+        </form>
+    </section>
+
+    <section>
+        <h3>Task list ({{ tasks|length }})</h3>
+
+        {% if tasks %}
+            {% for task in tasks %}
+                <article class="task">
+                    <h4 class="{{ 'completed' if task.completed else '' }}">
+                        {{ task.title }}
+                    </h4>
+
+                    {% if task.description %}
+                        <p>{{ task.description }}</p>
+                    {% endif %}
+
+                    <small>
+                        Status: {{ "Completed" if task.completed else "Pending" }}
+                    </small>
+
+                    <div class="actions">
+                        <form
+                            action="{{ url_for('main.toggle_task', task_id=task.id) }}"
+                            method="post"
+                        >
+                            <button type="submit">
+                                {{ "Mark pending" if task.completed else "Complete" }}
+                            </button>
+                        </form>
+
+                        <a href="{{ url_for('main.edit_task', task_id=task.id) }}">
+                            <button type="button">Edit</button>
+                        </a>
+
+                        <form
+                            action="{{ url_for('main.delete_task', task_id=task.id) }}"
+                            method="post"
+                            onsubmit="return confirm('Delete this task?');"
+                        >
+                            <button type="submit">Delete</button>
+                        </form>
+                    </div>
+                </article>
+            {% endfor %}
+        {% else %}
+            <p>No tasks yet. Add your first task above.</p>
+        {% endif %}
+    </section>
+{% endblock %}

@@ -1,0 +1,85 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}TaskFlow{% endblock %}</title>
+    <style>
+        body {
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: Arial, sans-serif;
+            color: #243044;
+            background: #f5f7fb;
+        }
+
+        main {
+            padding: 24px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        input, textarea, button {
+            box-sizing: border-box;
+            padding: 9px;
+            margin: 4px 0;
+        }
+
+        input, textarea {
+            width: 100%;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .task {
+            padding: 14px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #777;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            background: #eef2ff;
+        }
+
+        .error {
+            color: #a11;
+        }
+
+        .success {
+            color: #176b36;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <header>
+            <h1><a href="{{ url_for('main.index') }}">TaskFlow</a></h1>
+            <p>Simple task management application</p>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

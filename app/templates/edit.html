@@ -1,0 +1,32 @@
+
+{% extends "base.html" %}
+
+{% block title %}Edit task | TaskFlow{% endblock %}
+
+{% block content %}
+    <h2>Edit task</h2>
+
+    <form method="post">
+        <label for="title">Title</label>
+        <input
+            id="title"
+            name="title"
+            type="text"
+            maxlength="200"
+            value="{{ task.title }}"
+            required
+        >
+
+        <label for="description">Description</label>
+        <textarea
+            id="description"
+            name="description"
+            rows="4"
+        >{{ task.description }}</textarea>
+
+        <div class="actions">
+            <button type="submit">Save changes</button>
+            <a href="{{ url_for('main.index') }}">Cancel</a>
+        </div>
+    </form>
+{% endblock %}
