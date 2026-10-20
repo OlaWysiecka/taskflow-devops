@@ -1,0 +1,24 @@
+
+services:
+  db-test:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: taskflow_test
+      POSTGRES_USER: taskflow_test
+      POSTGRES_PASSWORD: taskflow_test_password
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - taskflow_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  taskflow_test_data:
+    name: taskflow_test_data
