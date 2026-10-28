@@ -1,9 +1,7 @@
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${TASKFLOW_IMAGE:-ghcr.io/olawysiecka/taskflow-devops:latest}
     environment:
       SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-taskflow}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-taskflow}
@@ -22,6 +20,7 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+    restart: unless-stopped
 
   db:
     image: postgres:17-alpine
@@ -39,6 +38,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    restart: unless-stopped
 
 volumes:
   postgres_data:
