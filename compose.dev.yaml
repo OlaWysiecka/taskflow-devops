@@ -1,5 +1,10 @@
+
 services:
   app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: taskflow-devops-app:dev
     volumes:
       - ./app:/app/app
     environment:
