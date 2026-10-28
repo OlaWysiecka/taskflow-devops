@@ -4,9 +4,12 @@ from flask import Flask
 
 from .extensions import db
 
+from prometheus_flask_exporter import PrometheusMetrics
+
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
+    PrometheusMetrics(app)
 
     app.config.from_mapping(
         SECRET_KEY=os.environ.get("SECRET_KEY", "dev-only-change-me"),
