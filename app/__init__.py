@@ -1,10 +1,9 @@
 import os
 
 from flask import Flask
+from prometheus_flask_exporter import PrometheusMetrics
 
 from .extensions import db
-
-from prometheus_flask_exporter import PrometheusMetrics
 
 
 def create_app(test_config=None):
