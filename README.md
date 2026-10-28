@@ -10,151 +10,222 @@ completion status.
 The project demonstrates practical DevOps practices, including automated testing, containerization, CI/CD,
 Infrastructure as Code (IaC), and application monitoring.
 
-The application will run in two separate environments: development (DEV) and production (PROD). The infrastructure will
-be hosted locally, without relying on paid cloud services.
+The application uses separate development (DEV) and production (PROD) environments hosted locally.
 
 ---
 
 ## 2. Technology Stack
 
 - Application: Python, Flask, HTML, Jinja2
-- Testing: pytest
+- Database: PostgreSQL, SQLAlchemy
+- Testing: pytest, Ruff
 - Version Control: Git, GitHub
-- IDE: Visual Studio Code
 - CI/CD: GitHub Actions
 - Containerization: Docker, Docker Compose
-- Infrastructure as Code: Terraform
 - Container Registry: GitHub Container Registry (GHCR)
-- Monitoring: Prometheus, Grafana
-- Deployment Environment: Ubuntu Server, VirtualBox
+- Application Server: Gunicorn
+- Infrastructure as Code: Terraform (planned)
+- Monitoring: Prometheus, Grafana (planned)
+- Production Environment: Ubuntu Server, VirtualBox
 
 ---
 
 ## 3. Application Overview
 
-TaskFlow is a web-based task management application built with Python and Flask. It allows users to create, view, edit,
-delete, and track tasks through a simple web interface.
+TaskFlow is a web-based task management application built with Python and Flask.
 
-The application uses SQLAlchemy for database operations and Jinja2 to render dynamic HTML pages. Its modular structure
-separates request handling, database models, and presentation logic.
+Features:
 
-The application supports standard CRUD operations and provides a /health endpoint for checking application availability.
-
-The initial development version uses SQLite, with PostgreSQL planned for the separate DEV and PROD environments.
+- Create, view, edit, and delete tasks.
+- Track task completion status.
+- Check application availability through the `/health` endpoint.
+- Use SQLAlchemy for database operations.
+- Run PostgreSQL integration tests against a dedicated test database.
 
 ---
+
 
 ## 4. Environments
 
 ### DEV - Development Environment
 
-The development environment is used for implementing new features, testing changes, and debugging the application.
+- Runs locally on Windows using Docker Compose.
+- Uses a dedicated PostgreSQL container and persistent data volume.
+- Supports automated tests using pytest and code quality checks using Ruff.
+- Uses a separate Compose configuration for PostgreSQL integration tests.
 
-Planned configuration:
+```mermaid
+flowchart TB
+    subgraph DEV["DEV — Windows"]
+        APP["Flask Application"]
+        DB[("PostgreSQL DEV")]
+        TESTS["pytest + Ruff"]
+        APP --- DB
+        TESTS -.-> APP
+    end
 
-* Runs locally on Windows using Docker Compose.
-* Uses a dedicated PostgreSQL database and separate data volumes.
-* Supports application development and automated tests.
-* Does not share application data or database volumes with PROD.
+    subgraph CICD["GitHub — CI/CD"]
+        REPO["GitHub Repository"]
+        ACTIONS["GitHub Actions"]
+        GHCR["GitHub Container Registry"]
+        REPO --> ACTIONS
+        ACTIONS --> GHCR
+    end
+
+    DEV -. "Push code" .-> REPO
+
+    classDef dev fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef cicd fill:#fef3c7,stroke:#d97706,color:#78350f
+
+    class APP,DB,TESTS dev
+    class REPO,ACTIONS,GHCR cicd
+```
+---
+
 
 ### PROD - Production Environment
 
-The production environment hosts the stable version of TaskFlow on a local Ubuntu Server virtual machine.
+- Runs on Ubuntu Server in VirtualBox.
+- Uses Docker Engine and Docker Compose.
+- Runs the application using Gunicorn.
+- Uses a separate PostgreSQL container and persistent data volume.
+- Application availability has been verified through the `/health` endpoint.
+- The application can be accessed from Windows through an SSH tunnel.
 
-#### Planned configuration:
+```mermaid
+flowchart TB
+    GHCR["GitHub Container Registry"]
 
-* Runs the application and its dependencies in Docker containers.
-* Uses a separate PostgreSQL database and persistent data volumes.
-* Receives application updates through the automated deployment pipeline.
-* Uses Prometheus and Grafana for monitoring.
-  Performs health checks after deployment.
+    subgraph PROD["PROD — Ubuntu Server in VirtualBox"]
+        APP["TaskFlow Application<br/>Gunicorn"]
+        DB[("PostgreSQL PROD<br/>Persistent Volume")]
+        PROM["Prometheus (planned)"]
+        GRAF["Grafana (planned)"]
+
+        APP --- DB
+        APP -. "Metrics (planned)" .-> PROM
+        PROM --> GRAF
+    end
+
+    TF["Terraform (planned)"]
+
+    GHCR -. "Manual deployment" .-> APP
+    TF -. "Infrastructure provisioning (planned)" .-> PROD
+
+    classDef registry fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef prod fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef monitor fill:#f3e8ff,stroke:#9333ea,color:#581c87
+
+    class GHCR,TF registry
+    class APP,DB prod
+    class PROM,GRAF monitor
+```
 
 ---
 
 ## 5. CI/CD Pipeline
 
-GitHub Actions will automate the build, testing, artifact publication, and deployment processes.
+GitHub Actions automates code validation and Docker image publication.
+
+
+---
 
 ### Continuous Integration (CI)
 
-On pushes to branches and pull requests:
+The workflow:
 
-* Check out the source code.
-* Run code quality checks using Ruff.
-* Execute automated tests using pytest.
-* Build the Docker image.
-* Publish the image to GHCR after successful checks, for eligible branch pushes.
-* Send a notification about the pipeline result.
+- Checks out the source code.
+- Installs Python dependencies.
+- Runs Ruff.
+- Runs automated tests using pytest and a PostgreSQL service.
+- Builds the Docker image after successful tests.
+- Publishes the image to GHCR on pushes to the `main` branch.
+
+The workflow has completed successfully, and the application image is available in GHCR.
+
+Published image tags are configured as:
+
+- `latest`
+- Git commit SHA
+
+---
 
 ### Continuous Deployment (CD)
 
-After a successful build and publication from the main branch:
+Automatic deployment from GitHub Actions to the production server has not yet been implemented.
 
-* Deploy the published Docker image to the PROD environment.
-* Verify application health.
-* Send a notification about the deployment result.
+The current production deployment is performed separately on the Ubuntu Server VM.
 
-Deployment will use a self-hosted GitHub Actions runner or another securely configured mechanism
-with access to the local virtual machine.
 
---- 
+---
 
 ## 6. Infrastructure as Code
 
-Terraform will be used to define and manage deployment resources. Docker Compose will define the application
-services and their configuration.
+Terraform configuration files will be created in `infra/terraform`, infrastructure provisioning has not yet been
+implemented.
 
-The goal is to make the deployment environment reproducible, minimize manual configuration, and verify
-the idempotency of infrastructure changes.
+Docker Compose currently defines the application and database services.
+
 
 ---
 
 ## 7. Monitoring
 
-Prometheus will collect application and infrastructure metrics. Grafana will visualize the metrics using
-dashboards and support alerting.
+Prometheus and Grafana are planned but not yet configured.
 
-Planned monitoring capabilities include:
-
-* Application availability.
-* HTTP request and error counts.
-* Application response times.
-* Container and infrastructure metrics.
-* Health checks and alerts.
+The `monitoring/` directory will contain the initial configuration structure. Application metrics and monitoring dashboards
+remain to be implemented.
 
 ---
 
 ## 8. Repository Structure
 
-The repository will contain:
-
-* app/ - Flask application source code.
-* tests/ - automated tests.
-* infra/ - Terraform configuration and infrastructure automation.
-* monitoring/ - Prometheus and Grafana configuration.
-* .github/workflows/ - CI/CD workflows.
-* Dockerfile - application image definition.
-* compose.yaml and environment-specific Compose files - service configuration.
-* README.md - project documentation.
+- `app/` - Flask application source code.
+- `tests/` - automated and integration tests.
+- `infra/terraform/` - Terraform configuration.
+- `monitoring/` - planned Prometheus and Grafana configuration.
+- `.github/workflows/` - GitHub Actions workflow.
+- `Dockerfile` - application image definition.
+- `compose.yaml` - base service configuration.
+- `compose.dev.yaml` - development configuration.
+- `compose.prod.yaml` - production configuration.
+- `compose.test.yaml` - integration test database configuration.
+- `README.md` - project documentation.
 
 ---
-
 ## 9. Project Goals
 
 - Develop a functional task management application.
-- Automate code testing and Docker image builds.
-- Publish application images to GHCR.
-- Implement automated deployment from the main branch.
+- Automate code testing and quality checks.
+- Build and publish Docker images to GHCR.
+- Implement automated production deployment.
 - Manage infrastructure using Terraform.
 - Monitor application health and performance.
-- Document the deployment and recovery process.
+- Document deployment and recovery procedures.
 
 ---
 
 ## 10. Current Status
 
-The initial Flask application with CRUD functionality, automated tests, and code quality checks is implemented. The application is containerized using Docker and Docker Compose, with PostgreSQL configured for the DEV environment.
+**Completed:**
 
-PostgreSQL integration tests have been implemented using a dedicated test database and a separate Docker Compose configuration. Gunicorn has been configured as the production application server.
+- Flask application with CRUD functionality.
+- Automated tests using pytest.
+- Code quality checks using Ruff.
+- Docker image build.
+- Docker Compose configuration for the application and PostgreSQL.
+- Separate PostgreSQL integration test environment.
+- Production application server configured with Gunicorn.
+- Ubuntu Server VM running the application.
+- GitHub Actions workflow for testing and image publication.
+- Successful publication of the application image to GHCR.
 
-CI/CD automation, infrastructure provisioning, production deployment, and monitoring are still in progress.
+---
+**Remaining:**
+
+
+- Implement automatic deployment from GitHub Actions to PROD.
+- Implement Terraform configuration.
+- Configure Prometheus and Grafana.
+- Add application metrics and monitoring dashboards.
+- Document the complete deployment and recovery process.
