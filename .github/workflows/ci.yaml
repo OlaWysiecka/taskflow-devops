@@ -54,7 +54,9 @@ jobs:
         run: ruff check .
 
       - name: Run all tests
-        run: pytest -v
+        env:
+          PYTHONPATH: .
+        run: python -m pytest -v
 
   docker-build-publish:
     name: Build and publish Docker image
