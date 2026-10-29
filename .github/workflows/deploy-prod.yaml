@@ -25,6 +25,19 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_CLIENT_SECRET }}
           tags: tag:ci
 
+      - name: Diagnose Tailscale connection to PROD
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+        run: |
+          set +e
+          echo "=== Tailscale status ==="
+          tailscale status
+          echo "=== Ping PROD ==="
+          tailscale ping --timeout=10s "$PROD_HOST"
+          echo "=== SSH port 22 ==="
+          timeout 5 bash -c "echo >/dev/tcp/$PROD_HOST/22"
+          echo "SSH port test exit code: $?"
+
       - name: Validate deployment secrets
         env:
           PROD_HOST: ${{ secrets.PROD_HOST }}
