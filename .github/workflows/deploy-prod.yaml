@@ -29,8 +29,12 @@ jobs:
           PROD_HOST: ${{ secrets.PROD_HOST }}
         run: |
           set -eu
-          tailscale ping --timeout=10s "$PROD_HOST"
-          echo "Tailscale connection verified."
+          if tailscale ping --timeout=10s "$PROD_HOST" >/dev/null 2>&1; then
+            echo "Tailscale peer is reachable."
+          else
+            echo "Tailscale ping failed."
+            exit 1
+          fi
 
       - name: Validate deployment secrets
         env:
