@@ -1,4 +1,3 @@
-
 name: Deploy TaskFlow to PROD
 
 on:
@@ -25,18 +24,13 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_CLIENT_SECRET }}
           tags: tag:ci
 
-      - name: Diagnose Tailscale connection to PROD
+      - name: Diagnose Tailscale connection
         env:
           PROD_HOST: ${{ secrets.PROD_HOST }}
         run: |
-          set +e
-          echo "=== Tailscale status ==="
-          tailscale status
-          echo "=== Ping PROD ==="
+          set -eu
           tailscale ping --timeout=10s "$PROD_HOST"
-          echo "=== SSH port 22 ==="
-          timeout 5 bash -c "echo >/dev/tcp/$PROD_HOST/22"
-          echo "SSH port test exit code: $?"
+          echo "Tailscale connection verified."
 
       - name: Validate deployment secrets
         env:
@@ -70,6 +64,7 @@ jobs:
           PROD_HOST: ${{ secrets.PROD_HOST }}
           PROD_USER: ${{ secrets.PROD_USER }}
         run: |
+          set -eu
           ssh -i ~/.ssh/id_ed25519 \
             -o BatchMode=yes \
             "$PROD_USER@$PROD_HOST" \
@@ -79,5 +74,5 @@ jobs:
 
       - name: Stop before deployment
         run: |
-          echo "Preflight passed. Actual deployment is intentionally not enabled yet."
-          echo "Production Compose configuration and Docker permissions must be verified first."
+          echo "Preflight passed."
+          echo "Actual deployment remains disabled pending database configuration verification."
